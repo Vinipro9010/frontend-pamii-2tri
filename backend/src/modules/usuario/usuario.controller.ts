@@ -36,7 +36,7 @@ export class UsuarioController {
     }
 
     @Post('login')
-    async login(usuario: string, senha: string): Promise<IUsuarioOutput> {
+    async login(@Body() { usuario, senha }: { usuario: string; senha: string }) {
         return await this.usuarioService.login(usuario, senha);
     }
 

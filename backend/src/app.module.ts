@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -8,6 +9,7 @@ import { MesaModule } from './modules/mesa/mesa.module';
 import { ProdutoModule } from './modules/produto/produto.module';
 import { ComandaItemModule } from './modules/comanda-item/comanda-item.module';
 import { UsuarioModule } from './modules/usuario/usuario.module';
+import { AuthModule } from './modules/auth/auth.module';
 import ormConfig from './config/orm.config';
 
 @Module({
@@ -28,6 +30,16 @@ import ormConfig from './config/orm.config';
     ProdutoModule,
     ComandaItemModule,
     UsuarioModule,
+    AuthModule,
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET')!,
+        signOptions: { expiresIn: configService.get<string>('JWT_EXPIRES_IN', '8h') as any },
+      }),
+      inject: [ConfigService],
+      global: true,
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],

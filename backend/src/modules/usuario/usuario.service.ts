@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { JwtService } from '@nestjs/jwt';
 import { Usuario } from './entities/usuario.entity';
 import { Repository } from 'typeorm';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
@@ -12,6 +13,7 @@ export class UsuarioService {
     constructor(
         @InjectRepository(Usuario)
         private readonly usuarioRepository: Repository<Usuario>,
+        private readonly jwtService: JwtService,
     ) {}
 
     async create(createUsuarioDto: CreateUsuarioDto) {
@@ -50,11 +52,12 @@ export class UsuarioService {
     }
 
     async login(usuario: string, senha: string) {
-        const user = await this.usuarioRepository.findOne({ where: { usuario, senha } })
-        if (!user) {
-            throw new Error(`Usuário ou senha inválidos`);
+        const user = await this.usuarioRepository.findOne({ where: { usuario } });
+        if (!user || user.senha !== senha) {
+            throw new UnauthorizedException('Usuário ou senha inválidos');
         }
-        return user;
+        const payload = { sub: user.id, usuario: user.usuario, perfil: user.perfil };
+        return { access_token: this.jwtService.sign(payload) };
     }
 
     async update(id: number, updateUsuarioDto: UpdateUsuarioDto) {
