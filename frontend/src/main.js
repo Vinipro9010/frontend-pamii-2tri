@@ -34,6 +34,17 @@ import './pages/produto/ListProdutoPage.js';
 import './pages/produto/CadProdutoPage.js';
 import './pages/produto/EditProdutoPage.js';
 
+// USUARIO
 import './pages/usuario/ListUsuarioPage.js';
 import './pages/usuario/CadUsuarioPage.js';
 import './pages/usuario/EditUsuarioPage.js';
+
+// MESA
+import './pages/mesa/ListMesaPage.js';
+import './pages/mesa/CadMesaPage.js';
+import './pages/mesa/EditMesaPage.js';
+
+// COMANDA
+import './pages/comanda/ListComandaPage.js';
+import './pages/comanda/CadComandaPage.js';
+import './pages/comanda/EditComandaPage.js';

@@ -1,11 +1,11 @@
-import './ListUsuarioPage.css'
+import './ListMesaPage.css'
 import { createHeader } from '../../shared/Header.js'
 import { logout, toast, showLoading } from '../../shared/util.js';
-import { getUsuarios, deleteUsuario } from '../../shared/api.js';
+import { getMesas, deleteMesa } from '../../shared/api.js';
 
-const pageName = 'Usuário';
+const pageName = 'Mesa';
 
-class ListUsuarioPage extends HTMLElement {
+class ListMesaPage extends HTMLElement {
     async connectedCallback() {
         this.classList.add('ion-page');
         const cabecalho = createHeader(pageName);
@@ -13,29 +13,29 @@ class ListUsuarioPage extends HTMLElement {
             ${cabecalho}
             <ion-content>
                 <div class="ion-padding">
-                    <ion-button expand="block" id="btn-add-usuario">
+                    <ion-button expand="block" id="btn-add-mesa">
                         <ion-icon name="person-add" slot="start"></ion-icon>
-                        Adicionar Novo Usuário
+                        Adicionar Nova Mesa
                     </ion-button>
                 </div>
-                <div class="list-usuario"></div>
+                <div class="list-mesa"></div>
             </ion-content>
         `;
         this.querySelector('#logout-btn')
         .addEventListener('click', logout);
 
-        this.querySelector('#btn-add-usuario').addEventListener('click', () => {
-            document.querySelector('ion-router').push('/usuario/create', 'forward');
+        this.querySelector('#btn-add-mesa').addEventListener('click', () => {
+            document.querySelector('ion-router').push('/mesa/create', 'forward');
         });
 
-        await this.loadUsuarios();
+        await this.loadMesas();
     }
 
-    async loadUsuarios() {
-        const loading = await showLoading('Buscando usuários...');
+    async loadMesas() {
+        const loading = await showLoading('Buscando mesas...');
         try {
-            const usuarios = await getUsuarios();
-            this.renderUsuarios(usuarios);
+            const mesas = await getMesas();
+            this.renderMesas(mesas);
         } catch (err) {
             toast(err.message);
         } finally {
@@ -43,40 +43,40 @@ class ListUsuarioPage extends HTMLElement {
         }
     }
 
-    renderUsuarios(usuarios) {
-        const container = this.querySelector(".list-usuario");
+    renderMesas(mesas) {
+        const container = this.querySelector(".list-mesa");
 
-        if (usuarios.length === 0) {
-            container.innerHTML = '<p style="text-align: center; padding: 20px;"> Nenhum usuario encontrado </p>'
+        if (mesas.length === 0) {
+            container.innerHTML = '<p style="text-align: center; padding: 20px;"> Nenhuma mesa encontrada </p>'
             return;
         }
         
-        const usuarioItems = usuarios.map(usuario => `
+        const mesaItems = mesas.map(mesa => `
             <ion-item>
                 <ion-label>
                 <h2 style="display: flex; align-items: center; gap: 8px;">
                     <ion-icon
-                    name="${usuario.perfil == 0 ? 'restaurant' : 'person'}"
-                    color="${usuario.perfil == 0 ? 'primary' : 'secondary'}"
+                    name="${mesa.status ? 'checkmark-circle' : 'close-circle'}"
+                    color="${mesa.status ? 'success' : 'danger'}"
                     style="flex-shrink: 0;"
                     ></ion-icon>
-                    <span>${usuario.nome}</span>
+                    <span>Mesa ${mesa.id}</span>
                 </h2>
-                <p>${usuario.usuario}</p>
+                <p>Cadeiras: ${mesa.qtd_cadeiras}</p>
                 </ion-label>
 
                 <ion-buttons slot="end">
-                <ion-button fill="clear" class="btn-edit" data-id="${usuario.id}">
+                <ion-button fill="clear" class="btn-edit" data-id="${mesa.id}">
                     <ion-icon slot="icon-only" name="create-outline"></ion-icon>
                 </ion-button>
-                <ion-button fill="clear" color="danger" class="btn-delete" data-id="${usuario.id}">
+                <ion-button fill="clear" color="danger" class="btn-delete" data-id="${mesa.id}">
                     <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
                 </ion-button>
                 </ion-buttons>
             </ion-item>
             `).join('');
     
-        container.innerHTML = `<ion-list>${usuarioItems}</ion-list>`;
+        container.innerHTML = `<ion-list>${mesaItems}</ion-list>`;
         this.setupEventListeners();
     }
 
@@ -84,7 +84,7 @@ class ListUsuarioPage extends HTMLElement {
         this.querySelectorAll('.btn-edit').forEach(btn => {
             btn.addEventListener('click', () => {
                 const id = btn.dataset.id;
-                document.querySelector('ion-router').push(`/usuario/edit?id=${id}`, 'forward');
+                document.querySelector('ion-router').push(`/mesa/edit?id=${id}`, 'forward');
             });
         });
 
@@ -93,7 +93,7 @@ class ListUsuarioPage extends HTMLElement {
                 const id = btn.dataset.id;
                 const alert = document.createElement('ion-alert');
                 alert.header = 'Confirmar Exclusão';
-                alert.message = 'Tem certeza que deseja excluir este usuário?';
+                alert.message = 'Tem certeza que deseja excluir esta mesa?';
                 alert.buttons = [
                     { text: 'Cancelar', role: 'cancel' },
                     {
@@ -101,9 +101,9 @@ class ListUsuarioPage extends HTMLElement {
                         handler: async () => {
                             const loading = await showLoading('Excluindo...');
                             try {
-                                await deleteUsuario(id);
-                                toast('Usuário excluído com sucesso!', 'success');
-                                await this.loadUsuarios();
+                                await deleteMesa(id);
+                                toast('Mesa excluída com sucesso!', 'success');
+                                await this.loadMesas();
                             } catch (err) {
                                 toast(err.message);
                             } finally {
@@ -119,4 +119,4 @@ class ListUsuarioPage extends HTMLElement {
     }
 }
 
-customElements.define('list-usuario-page', ListUsuarioPage);
+customElements.define('list-mesa-page', ListMesaPage);

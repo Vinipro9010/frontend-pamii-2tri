@@ -1,6 +1,7 @@
 import './CadUsuarioPage.css'
 import { createHeader } from '../../shared/Header.js'
-import { logout } from '../../shared/util.js';
+import { logout, toast, showLoading } from '../../shared/util.js';
+import { createUsuario } from '../../shared/api.js';
 
 const pageName = 'Cadastrar Usuario';
 
@@ -48,9 +49,39 @@ class CadUsuarioPage extends HTMLElement {
         `;
         this.querySelector('#logout-btn')
         .addEventListener('click', logout);
-        this.querySelector('#btn-cancelar').addEventListener('click',
+        this.querySelector('#btn-cancelar').addEventListener('click', () => window.history.back());
+
+        this.querySelector('#form-usuario').addEventListener('submit', async (e) => {
+            e.preventDefault();
             
-            () =>  windows.history.back());
+            const nome = this.querySelector('[name="nome"]').value;
+            const usuario = this.querySelector('[name="usuario"]').value;
+            const senha = this.querySelector('[name="senha"]').value;
+            const perfil = this.querySelector('[name="perfil"]').value;
+
+            if (!nome || !usuario || !senha) {
+                toast('Por favor, preencha todos os campos obrigatórios!');
+                return;
+            }
+
+            const dados = {
+                nome,
+                usuario,
+                senha,
+                perfil: parseInt(perfil)
+            };
+
+            const loading = await showLoading('Salvando usuário...');
+            try {
+                await createUsuario(dados);
+                toast('Usuário cadastrado com sucesso!', 'success');
+                document.querySelector('ion-router').push('/usuario/list', 'back');
+            } catch (err) {
+                toast(err.message);
+            } finally {
+                await loading.dismiss();
+            }
+        });
     }
 }
 
